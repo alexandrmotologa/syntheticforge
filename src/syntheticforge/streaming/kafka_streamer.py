@@ -84,8 +84,15 @@ class KafkaStreamer:
             self.sent_count += 1
             return True
 
+        headers = []
+        if event.trace_context:
+            headers = [
+                ("traceparent", event.trace_context.traceparent.encode("utf-8")),
+                ("tracestate", f"span={event.trace_context.span_id}".encode()),
+            ]
+
         try:
-            await self._producer.send(topic, key=key_bytes, value=payload_bytes)
+            await self._producer.send(topic, key=key_bytes, value=payload_bytes, headers=headers)
             self.sent_count += 1
             return True
         except KafkaError as err:

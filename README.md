@@ -168,11 +168,48 @@ anomalies:
 ## Architecture overview
 
 1. **Schema parser (`syntheticforge.config`)**: Validates the YAML definition against strict Pydantic v2 schemas.
-2. **Topological solver (`syntheticforge.graph.schema_graph`)**: Constructs an entity graph with `networkx`, verifies absence of cyclic dependencies, and groups entities into sequential dependency tiers.
-3. **Primary key pool (`syntheticforge.graph.pool`)**: Stores generated parent keys in memory. When child entities request foreign keys, the pool samples parent IDs using selected mathematical distributions.
-4. **Lifecycle engine (`syntheticforge.generator.lifecycle_simulator`)**: Manages discrete-event simulations where entities evolve through Markov chains. Events carry event timestamps adjusted by the virtual clock.
-5. **Streaming dispatchers (`syntheticforge.streaming`)**: Batches and dispatches events to Kafka topics or PostgreSQL tables. Employs async workers with backpressure management.
-6. **Integrity auditor (`syntheticforge.inspector.verifier`)**: Validates foreign key constraints, checking that every child record points to an existing parent record.
+2. **Topological solver (`syntheticforge.graph.schema_graph`)**: Constructs an entity graph with `networkx`, verifies absence of cyclic dependencies, and groups entities into sequential dependency tiers. Supports self-referential hierarchies and two-pass deferred foreign keys.
+3. **Primary key pool (`syntheticforge.graph.pool`)**: Stores generated parent keys in memory. When child entities request foreign keys, the pool samples parent IDs using selected mathematical distributions (Pareto, Gaussian, Zipfian, Uniform).
+4. **Lifecycle engine (`syntheticforge.generator.lifecycle_simulator`)**: Manages discrete-event simulations where entities evolve through Markov chains. Events carry event timestamps adjusted by the virtual clock and causal OpenTelemetry W3C trace contexts.
+5. **Streaming dispatchers (`syntheticforge.streaming`)**: Batches and dispatches events to Kafka topics, PostgreSQL tables, or signed HTTP Webhook endpoints with HMAC SHA-256. Employs async workers with backpressure management.
+6. **Integrity auditor (`syntheticforge.inspector.verifier`)**: Validates foreign key constraints with in-memory DuckDB queries, verifying that every child record points to an existing parent record.
+7. **Simulation checkpointing (`syntheticforge.checkpoint`)**: Saves and restores primary key pools, virtual clocks, and counters to resume long-running tests without key collisions.
+8. **Observability exporter (`syntheticforge.metrics`)**: Exposes Prometheus counters, gauges, and latency histograms on an asynchronous HTTP `/metrics` endpoint.
+9. **Interactive Web Studio (`syntheticforge.studio`)**: Real-time browser UI for DAG inspection, state transition graphs, schema evolution rules, and live event previews.
+
+## Interactive web studio
+
+Launch the built-in browser studio to inspect schemas, explore entity relationships, and review transition state machines:
+
+```bash
+syntheticforge studio --schema schemas/e-commerce-flow.yaml --port 8000
+```
+
+Open `http://localhost:8000` to view the interactive DAG visualization, lifecycle diagrams, and live sample payload generation.
+
+## Webhooks and distributed tracing
+
+SyntheticForge injects standard W3C `traceparent` and `tracestate` headers into Kafka records and Webhook deliveries, enabling end-to-end distributed tracing across downstream microservices:
+
+```bash
+syntheticforge stream \
+  --schema schemas/e-commerce-flow.yaml \
+  --target webhook \
+  --webhook-url https://api.example.com/events \
+  --webhook-secret "your-hmac-secret" \
+  --prometheus-port 9100 \
+  --checkpoint-file ./checkpoint.json
+```
+
+To resume from an existing state snapshot:
+
+```bash
+syntheticforge stream \
+  --schema schemas/e-commerce-flow.yaml \
+  --target webhook \
+  --resume-from ./checkpoint.json \
+  --limit 5000
+```
 
 ## Docker compose demo
 

@@ -77,6 +77,9 @@ class ForeignKeyConfig(BaseModel):
     distribution: SamplingDistribution = SamplingDistribution.UNIFORM
     pareto_alpha: float = 1.16  # Approx 80/20 rule
     zipf_alpha: float = 1.0
+    self_referential: bool = False
+    deferred: bool = False
+    root_null_ratio: float = 0.1
 
 
 class TransitionConfig(BaseModel):
@@ -121,10 +124,11 @@ class EntityConfig(BaseModel):
 
     @model_validator(mode="after")
     def sync_dependencies_from_foreign_keys(self) -> EntityConfig:
-        fk_entities = {fk.entity for fk in self.foreign_keys.values()}
-        for ent in fk_entities:
-            if ent not in self.depends_on:
-                self.depends_on.append(ent)
+        for fk in self.foreign_keys.values():
+            if fk.self_referential or fk.deferred:
+                continue
+            if fk.entity not in self.depends_on:
+                self.depends_on.append(fk.entity)
         return self
 
 
@@ -136,12 +140,22 @@ class AnomalyConfig(BaseModel):
     out_of_order_rate: float = Field(default=0.0, ge=0.0, le=1.0)
 
 
+class SchemaEvolutionConfig(BaseModel):
+    trigger_event_count: int | None = None
+    trigger_seconds: float | None = None
+    target_version: str = "2.0"
+    add_fields: dict[str, FieldConfig] = Field(default_factory=dict)
+    remove_fields: list[str] = Field(default_factory=list)
+    rename_fields: dict[str, str] = Field(default_factory=dict)
+
+
 class ForgeConfig(BaseModel):
     version: str = "1.0"
     name: str = "syntheticforge-spec"
     description: str | None = None
     entities: dict[str, EntityConfig]
     anomalies: AnomalyConfig = Field(default_factory=AnomalyConfig)
+    evolutions: dict[str, list[SchemaEvolutionConfig]] = Field(default_factory=dict)
 
     @field_validator("entities")
     @classmethod

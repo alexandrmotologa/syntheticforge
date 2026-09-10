@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import sys
 from pathlib import Path
+from typing import Any
 
 import typer
 from rich.console import Console
@@ -38,37 +39,55 @@ console = Console()
 def inspect(
     schema: Path = typer.Argument(..., help="Path to declarative YAML schema file.", exists=True),
 ) -> None:
-    """Inspect entity dependency graph, execution stages, and lifecycle rules."""
+    """Inspect declarative schema, display topological ordering, and entity relationship graph."""
     config = load_config(schema)
     graph = SchemaGraph(config)
 
     console.print(
         Panel.fit(
-            f"[bold cyan]Schema:[/] {config.name} (v{config.version})\n"
-            f"[bold white]Description:[/] {config.description or 'No description provided.'}",
-            title="SyntheticForge Schema",
+            f"[bold cyan]{config.name}[/] (v{config.version})\n"
+            f"[dim]{config.description or 'No description provided.'}[/]",
+            title="SyntheticForge Schema Definition",
             border_style="cyan",
         )
     )
 
-    # Dependency Tree
-    console.print("\n[bold yellow]Execution Stages & Dependency Hierarchy:[/]")
-    console.print(graph.to_ascii_tree())
+    table = Table(title="Topological Generation Order & Entities", show_header=True)
+    table.add_column("Stage", justify="right", style="cyan", no_wrap=True)
+    table.add_column("Entity", style="bold green")
+    table.add_column("Count", justify="right", style="yellow")
+    table.add_column("Primary Key", style="magenta")
+    table.add_column("Foreign Keys / Dependencies", style="blue")
+    table.add_column("Lifecycle States", style="white")
 
-    # Entities summary table
-    table = Table(title="Configured Entities", expand=True)
-    table.add_column("Entity", style="cyan")
-    table.add_column("Count", justify="right", style="green")
-    table.add_column("Primary Key", style="yellow")
-    table.add_column("Dependencies", style="magenta")
-    table.add_column("Has Lifecycle", justify="center")
+    for stage_idx, stage in enumerate(graph.topological_stages, 1):
+        for ent_name in stage:
+            ent = config.entities[ent_name]
+            fks = (
+                ", ".join(f"{fk_field} -> {fk.entity}" for fk_field, fk in ent.foreign_keys.items())
+                or "None"
+            )
+            states = "None"
+            if ent.lifecycle and ent.lifecycle.states:
+                states = " -> ".join(ent.lifecycle.states[:4])
+                if len(ent.lifecycle.states) > 4:
+                    states += f" (+{len(ent.lifecycle.states) - 4} more)"
 
-    for name, ent in config.entities.items():
-        deps = ", ".join(ent.depends_on) if ent.depends_on else "-"
-        has_lc = "[green]Yes[/]" if ent.lifecycle else "[dim]No[/]"
-        table.add_row(name, f"{ent.count:,}", ent.primary_key, deps, has_lc)
+            pk_type = ent.fields[ent.primary_key].type if ent.primary_key in ent.fields else "id"
+            table.add_row(
+                str(stage_idx),
+                ent_name,
+                f"{ent.count:,}",
+                f"{ent.primary_key} ({pk_type})",
+                fks,
+                states,
+            )
 
-    console.print("\n", table)
+    console.print(table)
+    console.print(f"\n[bold]Execution Stages:[/] {len(graph.topological_stages)}")
+    console.print(f"[bold]Total Entities:[/] {len(config.entities)}")
+    total_records = sum(e.count for e in config.entities.values())
+    console.print(f"[bold]Total Records to Generate:[/] {total_records:,}")
 
 
 @app.command()
@@ -76,7 +95,7 @@ def generate(
     schema: Path = typer.Option(..., "--schema", "-s", help="Path to YAML schema.", exists=True),
     sink: str = typer.Option("jsonl", "--sink", help="Output sink: jsonl, parquet, or postgres."),
     output_dir: Path = typer.Option(
-        Path("./output"), "--output-dir", "-o", help="Directory for output files."
+        Path("./output"), "--output-dir", "-o", help="Directory for file outputs."
     ),
     postgres_dsn: str | None = typer.Option(
         None, "--postgres-dsn", help="PostgreSQL DSN if using postgres sink."
@@ -130,24 +149,45 @@ def generate(
 def stream(
     schema: Path = typer.Option(..., "--schema", "-s", help="Path to YAML schema.", exists=True),
     target: str = typer.Option(
-        "kafka", "--target", "-t", help="Target dispatcher: kafka or postgres."
+        "kafka", "--target", "-t", help="Target dispatcher: kafka, postgres, or webhook."
     ),
     kafka_bootstrap: str = typer.Option(
         "localhost:9092", "--kafka-bootstrap", help="Kafka broker bootstrap servers."
+    ),
+    webhook_url: str | None = typer.Option(
+        None, "--webhook-url", help="HTTP endpoint URL for webhook target."
+    ),
+    webhook_secret: str | None = typer.Option(
+        None, "--webhook-secret", help="HMAC secret key for webhook payload signing."
     ),
     rate: float = typer.Option(1000.0, "--rate", "-r", help="Base event rate (events/sec)."),
     speed_factor: float = typer.Option(
         1.0, "--speed-factor", help="Virtual clock acceleration factor."
     ),
+    prometheus_port: int | None = typer.Option(
+        None, "--prometheus-port", help="Expose Prometheus metrics on this port (e.g. 9100)."
+    ),
+    checkpoint_file: Path | None = typer.Option(
+        None, "--checkpoint-file", help="Path to save simulation state snapshot upon completion."
+    ),
+    resume_from: Path | None = typer.Option(
+        None, "--resume-from", help="Resume simulation state from an existing checkpoint."
+    ),
     dashboard: bool = typer.Option(
         True, "--dashboard/--no-dashboard", help="Display interactive Rich Live dashboard."
     ),
     mock: bool = typer.Option(
-        False, "--mock", help="Run with mock dispatcher (does not require local Kafka/Postgres)."
+        False,
+        "--mock",
+        help="Run with mock dispatcher (does not require local Kafka/Postgres/Webhook).",
     ),
     limit: int | None = typer.Option(None, "--limit", "-n", help="Stop after streaming N events."),
 ) -> None:
     """Stream continuous lifecycle events with chaos injection and traffic curves."""
+    from syntheticforge.checkpoint import SimulationCheckpoint
+    from syntheticforge.metrics import PrometheusExporter
+    from syntheticforge.streaming.webhook_streamer import WebhookStreamer
+
     config = load_config(schema)
     sim = LifecycleSimulator(config, speed_factor=speed_factor)
     anomaly_injector = AnomalyInjector(config.anomalies)
@@ -155,14 +195,35 @@ def stream(
     stats = StreamStats()
     tui = RichLiveDashboard(config.name, target.upper())
 
+    if resume_from and resume_from.exists():
+        ckpt = SimulationCheckpoint.load(resume_from)
+        ckpt.restore_into(sim.generator.pool, stats)
+        console.print(
+            f"[bold green]Resumed state from {resume_from} ({stats.events_emitted} prior events).[/]"
+        )
+
     async def _run_stream() -> None:
-        dispatcher: KafkaStreamer | None = None
-        if target.lower() == "kafka":
+        dispatcher: Any = None
+        target_lower = target.lower()
+        if target_lower == "kafka":
             dispatcher = KafkaStreamer(
                 bootstrap_servers=kafka_bootstrap,
                 mock_mode=mock,
             )
             await dispatcher.start()
+        elif target_lower == "webhook":
+            url = webhook_url or "http://localhost:8080/webhook"
+            dispatcher = WebhookStreamer(
+                endpoint_url=url,
+                secret_key=webhook_secret,
+                mock_mode=mock,
+            )
+            await dispatcher.start()
+
+        prom_exporter: PrometheusExporter | None = None
+        if prometheus_port:
+            prom_exporter = PrometheusExporter(port=prometheus_port)
+            await prom_exporter.start()
 
         events_generator = sim.stream_events()
         event_count = 0
@@ -177,6 +238,8 @@ def stream(
                             await dispatcher.send_event(event)
 
                         stats.record_event(event.entity_name, event.state, anomaly)
+                        if prom_exporter:
+                            prom_exporter.registry.update_from_stats(stats, target=target)
                         live.update(tui.render(stats))
                         event_count += 1
                         if limit and event_count >= limit:
@@ -188,6 +251,8 @@ def stream(
                     if dispatcher:
                         await dispatcher.send_event(event)
                     stats.record_event(event.entity_name, event.state, anomaly)
+                    if prom_exporter:
+                        prom_exporter.registry.update_from_stats(stats, target=target)
                     event_count += 1
                     if event_count % 500 == 0:
                         console.print(
@@ -198,11 +263,41 @@ def stream(
         finally:
             if dispatcher:
                 await dispatcher.stop()
+            if prom_exporter:
+                await prom_exporter.stop()
 
     asyncio.run(_run_stream())
+
+    if checkpoint_file:
+        ckpt = SimulationCheckpoint.create(
+            virtual_seconds=stats.total_elapsed_seconds,
+            pool=sim.generator.pool,
+            stats=stats,
+        )
+        saved = ckpt.save(checkpoint_file)
+        console.print(f"[bold green]Saved simulation state checkpoint to {saved}[/]")
+
     console.print(
         f"\n[bold green]Streaming completed.[/] Total events emitted: {stats.events_emitted:,}"
     )
+
+
+@app.command()
+def studio(
+    schema: Path = typer.Option(
+        ..., "--schema", "-s", help="Path to YAML schema file.", exists=True
+    ),
+    host: str = typer.Option("127.0.0.1", "--host", help="Server host."),
+    port: int = typer.Option(8000, "--port", "-p", help="Server port."),
+) -> None:
+    """Launch the interactive SyntheticForge Web Studio in your browser."""
+    import uvicorn
+
+    from syntheticforge.studio.app import create_studio_app
+
+    console.print(f"[bold cyan]Launching SyntheticForge Web Studio on http://{host}:{port}...[/]")
+    studio_app = create_studio_app(schema)
+    uvicorn.run(studio_app, host=host, port=port)
 
 
 @app.command()

@@ -26,6 +26,7 @@ class EntityGenerator:
         self.graph = graph or SchemaGraph(config)
         self.pool = pool or EntityIdPool(seed=seed)
         self.field_gen = FieldGenerator(seed=seed)
+        self._deferred_queue: list[tuple[str, dict[str, Any], str, Any]] = []
 
     def generate_all(
         self, base_timestamp: datetime | None = None
@@ -46,7 +47,21 @@ class EntityGenerator:
                 )
                 dataset[entity_name] = records
 
+        # Reconcile deferred bidirectional foreign keys
+        self.reconcile_deferred()
         return dataset
+
+    def reconcile_deferred(self) -> None:
+        """Resolve queued deferred foreign keys after all entities are generated."""
+        for _ent_name, record, fk_col, fk_cfg in self._deferred_queue:
+            parent_id = self.pool.sample_key(
+                fk_cfg.entity,
+                distribution=fk_cfg.distribution,
+                pareto_alpha=fk_cfg.pareto_alpha,
+                zipf_alpha=fk_cfg.zipf_alpha,
+            )
+            record[fk_col] = parent_id
+        self._deferred_queue.clear()
 
     def generate_entity_batch(
         self,
@@ -71,15 +86,31 @@ class EntityGenerator:
                 pk_val = str(uuid.uuid4())
             record[pk_name] = pk_val
 
-            # 2. Resolve foreign keys from parent entities in pool
+            # 2. Resolve foreign keys from parent entities or self-reference
             for fk_col, fk_cfg in entity_cfg.foreign_keys.items():
-                parent_id = self.pool.sample_key(
-                    fk_cfg.entity,
-                    distribution=fk_cfg.distribution,
-                    pareto_alpha=fk_cfg.pareto_alpha,
-                    zipf_alpha=fk_cfg.zipf_alpha,
-                )
-                record[fk_col] = parent_id
+                if fk_cfg.self_referential or fk_cfg.entity == entity_name:
+                    # Self-referencing tree hierarchy
+                    existing_keys = self.pool.get_keys(entity_name)
+                    if not existing_keys or self.field_gen._rng.random() < fk_cfg.root_null_ratio:
+                        record[fk_col] = None
+                    else:
+                        record[fk_col] = self.pool.sample_key(
+                            entity_name,
+                            distribution=fk_cfg.distribution,
+                            pareto_alpha=fk_cfg.pareto_alpha,
+                            zipf_alpha=fk_cfg.zipf_alpha,
+                        )
+                elif fk_cfg.deferred:
+                    record[fk_col] = None
+                    self._deferred_queue.append((entity_name, record, fk_col, fk_cfg))
+                else:
+                    parent_id = self.pool.sample_key(
+                        fk_cfg.entity,
+                        distribution=fk_cfg.distribution,
+                        pareto_alpha=fk_cfg.pareto_alpha,
+                        zipf_alpha=fk_cfg.zipf_alpha,
+                    )
+                    record[fk_col] = parent_id
 
             # 3. Generate remaining fields
             for field_name, field_cfg in entity_cfg.fields.items():

@@ -52,6 +52,11 @@ class SchemaGraph:
         """Return entities grouped into parallelizable topological generations (stages)."""
         return [sorted(stage) for stage in nx.topological_generations(self.dag)]
 
+    @property
+    def topological_stages(self) -> list[list[str]]:
+        """Property returning topological generation stages."""
+        return self.generation_stages()
+
     def get_parents(self, entity: str) -> list[str]:
         """Return immediate parent entities that this entity depends on."""
         return list(self.dag.predecessors(entity))

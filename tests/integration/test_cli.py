@@ -88,3 +88,74 @@ def test_cli_stream_mock() -> None:
     assert stream_result.exit_code == 0
     assert "Streaming completed" in stream_result.output
     assert "Total events emitted: 25" in stream_result.output
+
+
+def test_cli_stream_webhook_mock() -> None:
+    stream_result = runner.invoke(
+        app,
+        [
+            "stream",
+            "--schema",
+            "schemas/e-commerce-flow.yaml",
+            "--target",
+            "webhook",
+            "--mock",
+            "--limit",
+            "15",
+            "--no-dashboard",
+            "--speed-factor",
+            "1000",
+        ],
+    )
+    assert stream_result.exit_code == 0
+    assert "Streaming completed" in stream_result.output
+    assert "Total events emitted: 15" in stream_result.output
+
+
+def test_cli_stream_checkpoint_and_resume(tmp_path: Path) -> None:
+    ckpt_file = tmp_path / "stream_ckpt.json"
+
+    # 1. Run stream and save checkpoint
+    res1 = runner.invoke(
+        app,
+        [
+            "stream",
+            "--schema",
+            "schemas/e-commerce-flow.yaml",
+            "--target",
+            "kafka",
+            "--mock",
+            "--limit",
+            "10",
+            "--no-dashboard",
+            "--speed-factor",
+            "1000",
+            "--checkpoint-file",
+            str(ckpt_file),
+        ],
+    )
+    assert res1.exit_code == 0
+    assert ckpt_file.exists()
+    assert "Saved simulation state checkpoint" in res1.output
+
+    # 2. Resume from checkpoint
+    res2 = runner.invoke(
+        app,
+        [
+            "stream",
+            "--schema",
+            "schemas/e-commerce-flow.yaml",
+            "--target",
+            "kafka",
+            "--mock",
+            "--limit",
+            "10",
+            "--no-dashboard",
+            "--speed-factor",
+            "1000",
+            "--resume-from",
+            str(ckpt_file),
+        ],
+    )
+    assert res2.exit_code == 0
+    assert "Resumed state from" in res2.output
