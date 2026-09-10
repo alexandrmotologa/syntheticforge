@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
 import random
-from typing import Any
+from collections import defaultdict
 
 from syntheticforge.config import DelayDistribution, LifecycleConfig, TransitionConfig
 

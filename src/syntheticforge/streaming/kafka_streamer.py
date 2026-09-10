@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import asyncio
-import json
 import logging
 from typing import Any
 
@@ -75,11 +74,13 @@ class KafkaStreamer:
         payload_bytes = event.to_json().encode("utf-8")
 
         if self.mock_mode or not self._producer:
-            self.mock_sent_events.append({
-                "topic": topic,
-                "key": event.entity_id,
-                "event": event.to_dict(),
-            })
+            self.mock_sent_events.append(
+                {
+                    "topic": topic,
+                    "key": event.entity_id,
+                    "event": event.to_dict(),
+                }
+            )
             self.sent_count += 1
             return True
 
@@ -92,9 +93,7 @@ class KafkaStreamer:
             self.error_count += 1
             return False
 
-    async def send_batch(
-        self, events: list[DomainEvent], topic_override: str | None = None
-    ) -> int:
+    async def send_batch(self, events: list[DomainEvent], topic_override: str | None = None) -> int:
         """Send a batch of events asynchronously."""
         tasks = [self.send_event(ev, topic_override=topic_override) for ev in events]
         results = await asyncio.gather(*tasks, return_exceptions=True)

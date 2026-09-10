@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import logging
 from typing import Any
-import yaml
 
 import asyncpg
+import yaml
 
 logger = logging.getLogger(__name__)
 

@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta, timezone
 import random
 import re
 import string
-import time
-from typing import Any
 import uuid
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from faker import Faker
 
@@ -94,7 +93,7 @@ class FieldGenerator:
 
     def _generate_ulid(self, base_timestamp: datetime | None = None) -> str:
         """Generate a 26-character sortable ULID string."""
-        now = base_timestamp or datetime.now(timezone.utc)
+        now = base_timestamp or datetime.now(UTC)
         millis = int(now.timestamp() * 1000)
         # Crockford's Base32 alphabet
         crockford = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"
@@ -134,7 +133,7 @@ class FieldGenerator:
         self, config: FieldConfig, base_timestamp: datetime | None = None
     ) -> str:
         """Generate an ISO 8601 formatted timestamp within past/future window."""
-        ref = base_timestamp or datetime.now(timezone.utc)
+        ref = base_timestamp or datetime.now(UTC)
         past_secs = config.past_days * 86400
         future_secs = config.future_days * 86400
 

@@ -1,6 +1,7 @@
 """Unit tests for SchemaGraph topological sorting and cycle detection."""
 
 import pytest
+
 from syntheticforge.config import ForgeConfig, load_config
 from syntheticforge.graph.schema_graph import CircularDependencyError, SchemaGraph
 

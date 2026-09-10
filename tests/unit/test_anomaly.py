@@ -1,6 +1,7 @@
 """Unit tests for targeted chaos and anomaly injection."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+
 from syntheticforge.config import AnomalyConfig
 from syntheticforge.generator.anomaly import AnomalyInjector
 from syntheticforge.generator.lifecycle_simulator import DomainEvent
@@ -13,7 +14,7 @@ def _make_event(eid: str) -> DomainEvent:
         entity_id=eid,
         state="CREATED",
         previous_state=None,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         payload={"order_id": eid, "amount": 100.5, "status": "CREATED"},
     )
 
@@ -23,7 +24,7 @@ def test_duplicate_key_injection() -> None:
     injector = AnomalyInjector(cfg, seed=42)
 
     # First event is recorded in seen_ids
-    ev1, a1 = injector.inject(_make_event("order_1"))
+    _ev1, a1 = injector.inject(_make_event("order_1"))
     assert a1 is None  # no seen IDs prior to first
 
     # Second event must be injected with duplicate key

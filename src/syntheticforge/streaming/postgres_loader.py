@@ -80,9 +80,7 @@ class PostgresLoader:
         async with self._pool.acquire() as conn:
             await conn.execute(ddl)
 
-    async def bulk_load(
-        self, entity_name: str, records: list[dict[str, Any]]
-    ) -> int:
+    async def bulk_load(self, entity_name: str, records: list[dict[str, Any]]) -> int:
         """Bulk insert records using PostgreSQL COPY protocol."""
         if not records:
             return 0

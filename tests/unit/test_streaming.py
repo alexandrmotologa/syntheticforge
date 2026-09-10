@@ -1,9 +1,10 @@
 """Unit tests for streaming sinks, traffic curves, and file exporters."""
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-import pytest
+
 import pyarrow.parquet as pq
+import pytest
 
 from syntheticforge.config import EntityConfig, FieldConfig, FieldType
 from syntheticforge.generator.lifecycle_simulator import DomainEvent
@@ -17,8 +18,8 @@ def test_diurnal_traffic_curve() -> None:
     curve = DiurnalTrafficCurve(base_rate=1000.0, peak_hour=14.0, seed=42)
 
     # Peak hour (14:00) vs Trough (02:00)
-    peak_time = datetime(2026, 9, 10, 14, 0, 0)
-    trough_time = datetime(2026, 9, 10, 2, 0, 0)
+    peak_time = datetime(2026, 9, 10, 14, 0, 0, tzinfo=UTC)
+    trough_time = datetime(2026, 9, 10, 2, 0, 0, tzinfo=UTC)
 
     peak_rate = curve.get_rate(peak_time)
     trough_rate = curve.get_rate(trough_time)
@@ -62,7 +63,7 @@ async def test_kafka_streamer_mock_mode() -> None:
         entity_id="ord_999",
         state="CREATED",
         previous_state=None,
-        timestamp=datetime.now(timezone.utc),
+        timestamp=datetime.now(UTC),
         payload={"order_id": "ord_999", "total": 45.0},
     )
 

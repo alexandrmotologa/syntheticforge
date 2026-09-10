@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
 import random
-from typing import Any
+from datetime import timedelta
 
 from syntheticforge.config import AnomalyConfig
 from syntheticforge.generator.lifecycle_simulator import DomainEvent
@@ -88,8 +87,7 @@ class AnomalyInjector:
 
         # 5. Out of Order Event (testing watermark / stream reordering)
         elif (
-            self.config.out_of_order_rate > 0
-            and self._rng.random() < self.config.out_of_order_rate
+            self.config.out_of_order_rate > 0 and self._rng.random() < self.config.out_of_order_rate
         ):
             skew_seconds = self._rng.uniform(30.0, 300.0)
             mutated_ts = mutated_ts - timedelta(seconds=skew_seconds)

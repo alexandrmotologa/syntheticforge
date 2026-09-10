@@ -1,7 +1,5 @@
 """Unit tests for Markov chain StateMachine and LifecycleSimulator."""
 
-from datetime import datetime, timezone
-import pytest
 from syntheticforge.config import LifecycleConfig, TransitionConfig, load_config
 from syntheticforge.generator.lifecycle_simulator import LifecycleSimulator
 from syntheticforge.generator.state_machine import StateMachine
@@ -13,13 +11,28 @@ def test_state_machine_transitions_and_terminal_states() -> None:
         states=["CREATED", "PAYMENT_PENDING", "COMPLETED", "CANCELLED"],
         transitions=[
             TransitionConfig(
-                **{"from": "CREATED", "to": "PAYMENT_PENDING", "probability": 1.0, "delay_seconds": 2.0}
+                **{
+                    "from": "CREATED",
+                    "to": "PAYMENT_PENDING",
+                    "probability": 1.0,
+                    "delay_seconds": 2.0,
+                }
             ),
             TransitionConfig(
-                **{"from": "PAYMENT_PENDING", "to": "COMPLETED", "probability": 0.8, "delay_seconds": 5.0}
+                **{
+                    "from": "PAYMENT_PENDING",
+                    "to": "COMPLETED",
+                    "probability": 0.8,
+                    "delay_seconds": 5.0,
+                }
             ),
             TransitionConfig(
-                **{"from": "PAYMENT_PENDING", "to": "CANCELLED", "probability": 0.2, "delay_seconds": 1.0}
+                **{
+                    "from": "PAYMENT_PENDING",
+                    "to": "CANCELLED",
+                    "probability": 0.2,
+                    "delay_seconds": 1.0,
+                }
             ),
         ],
     )

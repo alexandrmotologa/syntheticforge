@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from collections import defaultdict
 import math
 import random
+from collections import defaultdict
 from typing import Any
 
 from syntheticforge.config import SamplingDistribution
@@ -102,13 +102,13 @@ class EntityIdPool:
             # Centered Gaussian in the middle of the population
             mu = (n - 1) / 2.0
             sigma = max(1.0, n / 6.0)
-            val = int(round(self._rng.gauss(mu, sigma)))
+            val = round(self._rng.gauss(mu, sigma))
             return max(0, min(n - 1, val))
 
         elif distribution == SamplingDistribution.RECENT_WEIGHTED:
             # Quadratic skew towards latest elements (temporal locality)
             u = self._rng.random()
-            idx = int(math.floor(math.sqrt(u) * n))
+            idx = math.floor(math.sqrt(u) * n)
             return max(0, min(n - 1, idx))
 
         return self._rng.randint(0, n - 1)

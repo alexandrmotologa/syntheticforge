@@ -65,7 +65,9 @@ class RelationalVerifier:
             if records:
                 arrow_table = pa.Table.from_pylist(records)
                 self.con.register(f"temp_{ent_name}", arrow_table)
-                self.con.execute(f"CREATE OR REPLACE TABLE {ent_name} AS SELECT * FROM temp_{ent_name}")
+                self.con.execute(
+                    f"CREATE OR REPLACE TABLE {ent_name} AS SELECT * FROM temp_{ent_name}"
+                )
             else:
                 self.con.execute(f"CREATE OR REPLACE TABLE {ent_name} (dummy INT)")
 

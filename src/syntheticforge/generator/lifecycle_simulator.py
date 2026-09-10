@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
 import heapq
 import json
-import time
-from typing import Any, AsyncIterator, Iterator
 import uuid
+from collections.abc import AsyncIterator, Iterator
+from dataclasses import dataclass, field
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from syntheticforge.config import ForgeConfig
 from syntheticforge.generator.entity_generator import EntityGenerator
@@ -66,7 +66,7 @@ class LifecycleSimulator:
         self.config = config
         self.generator = generator or EntityGenerator(config, seed=seed)
         self.speed_factor = max(0.001, speed_factor)
-        self.start_time = start_time or datetime.now(timezone.utc)
+        self.start_time = start_time or datetime.now(UTC)
         self._seed = seed
 
         # Initialize state machines for configured entities

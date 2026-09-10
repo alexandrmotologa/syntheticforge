@@ -1,7 +1,7 @@
 """Unit tests for FieldGenerator data types and constraints."""
 
-from datetime import datetime, timezone
 import re
+
 from syntheticforge.config import FieldConfig, FieldType
 from syntheticforge.generator.field_generators import FieldGenerator
 

@@ -21,8 +21,7 @@ class JsonlSink:
         """Write records for an entity to <output_dir>/<entity_name>.jsonl."""
         file_path = self.output_dir / f"{entity_name}.jsonl"
         with open(file_path, "w", encoding="utf-8") as f:
-            for record in records:
-                f.write(json.dumps(record, default=str) + "\n")
+            f.writelines(json.dumps(record, default=str) + "\n" for record in records)
         return file_path
 
     def write_all(self, dataset: dict[str, list[dict[str, Any]]]) -> dict[str, Path]:

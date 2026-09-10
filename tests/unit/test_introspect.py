@@ -1,6 +1,7 @@
 """Unit tests for SchemaIntrospector."""
 
 import pytest
+
 from syntheticforge.inspector.introspect import SchemaIntrospector
 
 
@@ -21,7 +22,9 @@ async def test_introspector_mock_and_yaml_export() -> None:
         },
     }
 
-    introspector = SchemaIntrospector("postgresql://test:test@localhost:5432/test", mock_data=mock_schema)
+    introspector = SchemaIntrospector(
+        "postgresql://test:test@localhost:5432/test", mock_data=mock_schema
+    )
     result = await introspector.introspect()
 
     assert result["name"] == "mock-db"

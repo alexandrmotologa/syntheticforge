@@ -6,8 +6,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 import yaml
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 class FieldType(str, Enum):
@@ -100,7 +100,9 @@ class LifecycleConfig(BaseModel):
     @model_validator(mode="after")
     def validate_lifecycle(self) -> LifecycleConfig:
         if self.initial_state not in self.states:
-            raise ValueError(f"initial_state '{self.initial_state}' must be in states {self.states}")
+            raise ValueError(
+                f"initial_state '{self.initial_state}' must be in states {self.states}"
+            )
         for t in self.transitions:
             if t.from_state not in self.states:
                 raise ValueError(f"Transition from '{t.from_state}' is not in states {self.states}")
@@ -149,9 +151,7 @@ class ForgeConfig(BaseModel):
         for entity_name, entity_cfg in v.items():
             for dep in entity_cfg.depends_on:
                 if dep not in v:
-                    raise ValueError(
-                        f"Entity '{entity_name}' depends on undefined entity '{dep}'."
-                    )
+                    raise ValueError(f"Entity '{entity_name}' depends on undefined entity '{dep}'.")
         return v
 
 

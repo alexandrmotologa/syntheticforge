@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import datetime
 import math
 import random
+from datetime import UTC, datetime
 
 
 class DiurnalTrafficCurve:
@@ -30,7 +30,7 @@ class DiurnalTrafficCurve:
 
     def get_rate(self, current_time: datetime | None = None) -> float:
         """Return the target event rate (EPS) for the given datetime."""
-        dt = current_time or datetime.now()
+        dt = current_time or datetime.now(UTC)
         hour_fraction = dt.hour + dt.minute / 60.0 + dt.second / 3600.0
 
         # Sinusoidal diurnal wave with peak at peak_hour

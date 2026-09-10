@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+import uuid
 from datetime import datetime
 from typing import Any
-import uuid
 
-from syntheticforge.config import EntityConfig, FieldConfig, FieldType, ForgeConfig
+from syntheticforge.config import EntityConfig, ForgeConfig
 from syntheticforge.generator.field_generators import FieldGenerator
 from syntheticforge.graph.pool import EntityIdPool
 from syntheticforge.graph.schema_graph import SchemaGraph

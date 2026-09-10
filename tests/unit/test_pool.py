@@ -1,7 +1,9 @@
 """Unit tests for EntityIdPool and foreign key sampling distributions."""
 
 from collections import Counter
+
 import pytest
+
 from syntheticforge.config import SamplingDistribution
 from syntheticforge.graph.pool import EntityIdPool
 

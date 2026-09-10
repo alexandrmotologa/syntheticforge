@@ -80,4 +80,7 @@ def test_duckdb_verifier_detects_orphan_foreign_keys() -> None:
 
     assert report.passed is False
     assert len(report.orphan_fks) > 0
-    assert any("UNKNOWN_PARENT_ID_999" in str(report.violations) or "orphan" in v for v in report.violations)
+    assert any(
+        "UNKNOWN_PARENT_ID_999" in str(report.violations) or "orphan" in v
+        for v in report.violations
+    )
