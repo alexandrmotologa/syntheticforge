@@ -1,0 +1,72 @@
+version: "1.0"
+name: "iot-telemetry-flow"
+description: "IoT sensory mesh with facilities, devices, sensor telemetry series, and anomalies"
+
+entities:
+  facilities:
+    count: 20
+    primary_key: "id"
+    fields:
+      id:
+        type: "uuid"
+      location_name:
+        type: "name"
+      country:
+        type: "enum"
+        values: ["DE", "RO", "US", "JP", "FR"]
+        weights: [0.3, 0.25, 0.2, 0.15, 0.1]
+
+  devices:
+    count: 100
+    primary_key: "id"
+    depends_on: ["facilities"]
+    foreign_keys:
+      facility_id:
+        entity: "facilities"
+        field: "id"
+        distribution: "uniform"
+    fields:
+      id:
+        type: "uuid"
+      serial_number:
+        type: "regex"
+        pattern: "DEV-[0-9]{4}-[A-Z]{3}"
+      firmware_version:
+        type: "enum"
+        values: ["v2.1.0", "v2.2.4", "v3.0.0-rc1"]
+        weights: [0.2, 0.7, 0.1]
+      status:
+        type: "enum"
+        values: ["ONLINE", "MAINTENANCE", "OFFLINE"]
+        weights: [0.94, 0.04, 0.02]
+
+  telemetry_readings:
+    count: 5000
+    primary_key: "id"
+    depends_on: ["devices"]
+    foreign_keys:
+      device_id:
+        entity: "devices"
+        field: "id"
+        distribution: "uniform"
+    fields:
+      id:
+        type: "uuid"
+      temperature_celsius:
+        type: "decimal"
+        min: 18.0
+        max: 85.0
+        precision: 1
+      vibration_hz:
+        type: "decimal"
+        min: 0.1
+        max: 120.0
+        precision: 2
+      timestamp:
+        type: "timestamp"
+        past_days: 7
+
+anomalies:
+  duplicate_key_rate: 0.01
+  schema_mutation_rate: 0.02
+  payload_corruption_rate: 0.01

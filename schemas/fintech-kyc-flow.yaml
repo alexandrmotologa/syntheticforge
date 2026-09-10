@@ -1,0 +1,128 @@
+version: "1.0"
+name: "fintech-kyc-flow"
+description: "Fintech banking stream with users, accounts, KYC compliance checks, and ledger transactions"
+
+entities:
+  users:
+    count: 150
+    primary_key: "id"
+    fields:
+      id:
+        type: "uuid"
+      first_name:
+        type: "name"
+      email:
+        type: "email"
+      ssn_masked:
+        type: "regex"
+        pattern: "\\*\\*\\*-\\*{2}-[0-9]{4}"
+      created_at:
+        type: "timestamp"
+        past_days: 180
+
+  accounts:
+    count: 300
+    primary_key: "id"
+    depends_on: ["users"]
+    foreign_keys:
+      user_id:
+        entity: "users"
+        field: "id"
+        distribution: "pareto"
+    fields:
+      id:
+        type: "uuid"
+      iban:
+        type: "regex"
+        pattern: "RO[0-9]{2}BTRL[0-9A-Z]{16}"
+      currency:
+        type: "enum"
+        values: ["EUR", "USD", "RON"]
+        weights: [0.5, 0.3, 0.2]
+      balance:
+        type: "decimal"
+        min: 100.0
+        max: 50000.0
+        precision: 2
+      status:
+        type: "enum"
+        values: ["ACTIVE", "RESTRICTED", "DORMANT"]
+        weights: [0.9, 0.08, 0.02]
+
+  kyc_verifications:
+    count: 150
+    primary_key: "id"
+    depends_on: ["users"]
+    foreign_keys:
+      user_id:
+        entity: "users"
+        field: "id"
+        distribution: "uniform"
+    fields:
+      id:
+        type: "uuid"
+      document_type:
+        type: "enum"
+        values: ["PASSPORT", "NATIONAL_ID", "DRIVING_LICENSE"]
+        weights: [0.4, 0.5, 0.1]
+      risk_score:
+        type: "decimal"
+        min: 0.01
+        max: 0.99
+        precision: 4
+    lifecycle:
+      initial_state: "SUBMITTED"
+      states: ["SUBMITTED", "MANUAL_REVIEW", "VERIFIED", "REJECTED"]
+      transitions:
+        - from: "SUBMITTED"
+          to: "VERIFIED"
+          probability: 0.85
+          delay_seconds: 3.0
+        - from: "SUBMITTED"
+          to: "MANUAL_REVIEW"
+          probability: 0.10
+          delay_seconds: 5.0
+        - from: "SUBMITTED"
+          to: "REJECTED"
+          probability: 0.05
+          delay_seconds: 2.0
+        - from: "MANUAL_REVIEW"
+          to: "VERIFIED"
+          probability: 0.80
+          delay_seconds: 10.0
+        - from: "MANUAL_REVIEW"
+          to: "REJECTED"
+          probability: 0.20
+          delay_seconds: 5.0
+
+  transactions:
+    count: 2000
+    primary_key: "id"
+    depends_on: ["accounts"]
+    foreign_keys:
+      account_id:
+        entity: "accounts"
+        field: "id"
+        distribution: "pareto"
+    fields:
+      id:
+        type: "uuid"
+      amount:
+        type: "decimal"
+        min: 5.0
+        max: 9500.0
+        precision: 2
+      direction:
+        type: "enum"
+        values: ["DEBIT", "CREDIT"]
+        weights: [0.6, 0.4]
+      merchant:
+        type: "name"
+      timestamp:
+        type: "timestamp"
+        past_days: 14
+
+anomalies:
+  duplicate_key_rate: 0.005
+  schema_mutation_rate: 0.002
+  payload_corruption_rate: 0.001

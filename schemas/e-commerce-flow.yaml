@@ -1,0 +1,134 @@
+version: "1.0"
+name: "e-commerce-flow"
+description: "Realistic e-commerce event stream with customers, orders, payments, and shipments"
+
+entities:
+  customers:
+    count: 200
+    primary_key: "id"
+    fields:
+      id:
+        type: "uuid"
+      name:
+        type: "name"
+      email:
+        type: "email"
+      country:
+        type: "enum"
+        values: ["US", "DE", "FR", "RO", "GB", "CA"]
+        weights: [0.4, 0.2, 0.15, 0.1, 0.1, 0.05]
+      created_at:
+        type: "timestamp"
+        past_days: 90
+
+  orders:
+    count: 1000
+    primary_key: "id"
+    depends_on: ["customers"]
+    foreign_keys:
+      customer_id:
+        entity: "customers"
+        field: "id"
+        distribution: "pareto"
+    fields:
+      id:
+        type: "uuid"
+      total_amount:
+        type: "decimal"
+        min: 15.0
+        max: 1250.0
+        precision: 2
+      currency:
+        type: "enum"
+        values: ["USD", "EUR", "RON"]
+        weights: [0.6, 0.3, 0.1]
+      created_at:
+        type: "timestamp"
+        past_days: 30
+    lifecycle:
+      initial_state: "CREATED"
+      states: ["CREATED", "PAYMENT_PENDING", "PROCESSING", "COMPLETED", "CANCELLED"]
+      transitions:
+        - from: "CREATED"
+          to: "PAYMENT_PENDING"
+          probability: 0.96
+          delay_seconds: 1.5
+        - from: "CREATED"
+          to: "CANCELLED"
+          probability: 0.04
+          delay_seconds: 3.0
+        - from: "PAYMENT_PENDING"
+          to: "PROCESSING"
+          probability: 0.95
+          delay_seconds: 2.0
+        - from: "PAYMENT_PENDING"
+          to: "CANCELLED"
+          probability: 0.05
+          delay_seconds: 1.0
+        - from: "PROCESSING"
+          to: "COMPLETED"
+          probability: 0.98
+          delay_seconds: 5.0
+        - from: "PROCESSING"
+          to: "CANCELLED"
+          probability: 0.02
+          delay_seconds: 2.0
+
+  payments:
+    count: 950
+    primary_key: "id"
+    depends_on: ["orders"]
+    foreign_keys:
+      order_id:
+        entity: "orders"
+        field: "id"
+        distribution: "uniform"
+    fields:
+      id:
+        type: "uuid"
+      payment_method:
+        type: "enum"
+        values: ["CREDIT_CARD", "PAYPAL", "APPLE_PAY", "CRYPTO"]
+        weights: [0.65, 0.20, 0.12, 0.03]
+      card_number:
+        type: "credit_card"
+      status:
+        type: "enum"
+        values: ["SUCCESS", "DECLINED", "PENDING"]
+        weights: [0.92, 0.05, 0.03]
+      created_at:
+        type: "timestamp"
+        past_days: 25
+
+  shipments:
+    count: 900
+    primary_key: "id"
+    depends_on: ["orders"]
+    foreign_keys:
+      order_id:
+        entity: "orders"
+        field: "id"
+        distribution: "uniform"
+    fields:
+      id:
+        type: "uuid"
+      carrier:
+        type: "enum"
+        values: ["DHL", "FEDEX", "UPS", "FAN_COURIER"]
+        weights: [0.35, 0.30, 0.25, 0.10]
+      tracking_number:
+        type: "regex"
+        pattern: "[A-Z]{2}[0-9]{9}[A-Z]{2}"
+      status:
+        type: "enum"
+        values: ["DISPATCHED", "IN_TRANSIT", "DELIVERED", "RETURNED"]
+        weights: [0.1, 0.2, 0.68, 0.02]
+      created_at:
+        type: "timestamp"
+        past_days: 20
+
+anomalies:
+  duplicate_key_rate: 0.02
+  schema_mutation_rate: 0.01
+  payload_corruption_rate: 0.005
+  null_injection_rate: 0.01
