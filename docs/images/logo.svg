@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <defs>
+    <clipPath id="squircle-clip">
+      <rect x="24" y="24" width="976" height="976" rx="220" />
+    </clipPath>
+
+    <linearGradient id="cyan-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f5ff"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+
+    <linearGradient id="amber-forge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+
+    <linearGradient id="facet-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#64748b"/>
+      <stop offset="100%" stop-color="#475569"/>
+    </linearGradient>
+
+    <linearGradient id="facet-mid" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+
+    <linearGradient id="facet-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <linearGradient id="facet-shadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#080c14"/>
+    </linearGradient>
+
+    <filter id="subtle-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="22" flood-color="#000000" flood-opacity="0.16" />
+    </filter>
+  </defs>
+
+  <!-- Luxury White Squircle Container -->
+  <rect x="24" y="24" width="976" height="976" rx="220" fill="#ffffff" stroke="#e2e8f0" stroke-width="6" />
+
+  <g clip-path="url(#squircle-clip)">
+    <g transform="translate(512, 512)" filter="url(#subtle-shadow)">
+
+      <!-- Hexagonal Architectural Gateway Frame -->
+      <polygon points="
+        0,-390
+        338,-195
+        338,195
+        0,390
+        -338,195
+        -338,-195
+      " fill="none" stroke="#0f172a" stroke-width="40" stroke-linejoin="round" />
+
+      <!-- Dashed Inner Accent Ring -->
+      <polygon points="
+        0,-355
+        307,-177
+        307,177
+        0,355
+        -307,177
+        -307,-177
+      " fill="none" stroke="#00f5ff" stroke-width="4" opacity="0.45" stroke-dasharray="16, 12" />
+
+      <!-- Sub-frame Technical Calibration Markers -->
+      <line x1="-338" y1="0" x2="-307" y2="0" stroke="#00f5ff" stroke-width="3" opacity="0.6" />
+      <line x1="338" y1="0" x2="307" y2="0" stroke="#00f5ff" stroke-width="3" opacity="0.6" />
+      <line x1="-169" y1="-292" x2="-154" y2="-266" stroke="#00f5ff" stroke-width="3" opacity="0.6" />
+      <line x1="169" y1="-292" x2="154" y2="-266" stroke="#00f5ff" stroke-width="3" opacity="0.6" />
+      <line x1="-169" y1="292" x2="-154" y2="266" stroke="#00f5ff" stroke-width="3" opacity="0.6" />
+      <line x1="169" y1="292" x2="154" y2="266" stroke="#00f5ff" stroke-width="3" opacity="0.6" />
+
+      <!-- ======================================================== -->
+      <!-- MASCOT: THE FORGE RAM (Aries Metallurgicus)             -->
+      <!-- Symmetrical Low-Poly Origami Vector mark                -->
+      <!-- ======================================================== -->
+
+      <!-- CHEST & SHOULDER GORGET (Base Mass) -->
+      <!-- Left Chest Plates -->
+      <polygon points="0,150 -70,140 -160,240 -100,310 0,285" fill="url(#facet-shadow)" />
+      <polygon points="0,150 -70,140 -60,230 0,285" fill="url(#facet-dark)" />
+      <polygon points="-70,140 -160,240 -60,230" fill="url(#facet-mid)" />
+
+      <!-- Right Chest Plates (Symmetrical) -->
+      <polygon points="0,150 70,140 160,240 100,310 0,285" fill="url(#facet-shadow)" />
+      <polygon points="0,150 70,140 60,230 0,285" fill="url(#facet-mid)" />
+      <polygon points="70,140 160,240 60,230" fill="url(#facet-light)" />
+
+      <!-- Forge Heart Ember in Gorget (Amber Glow) -->
+      <polygon points="0,185 28,220 0,255 -28,220" fill="url(#amber-forge)" opacity="0.9" />
+      <polygon points="0,195 18,220 0,245 -18,220" fill="#fbbf24" />
+      <polygon points="0,205 8,220 0,235 -8,220" fill="#ffffff" />
+
+      <!-- ======================================================== -->
+      <!-- MASSIVE ANVIL HORNS (Left & Right)                       -->
+      <!-- ======================================================== -->
+
+      <!-- LEFT HORN (Outer Sweep & Inward Spiral) -->
+      <!-- Segment 1: Horn Root (Forehead out to crest) -->
+      <polygon points="-50,-130 -140,-210 -110,-240 -30,-165" fill="url(#facet-light)" />
+      <polygon points="-50,-130 -140,-210 -130,-160 -45,-105" fill="url(#facet-mid)" />
+
+      <!-- Segment 2: Horn Arch (Highest point, curling back) -->
+      <polygon points="-140,-210 -225,-180 -185,-140 -130,-160" fill="url(#facet-light)" />
+      <polygon points="-140,-210 -225,-180 -210,-235 -110,-240" fill="url(#facet-shadow)" />
+
+      <!-- Segment 3: Outer Horn Drop (Flank descent) -->
+      <polygon points="-225,-180 -265,-75 -215,-70 -185,-140" fill="url(#facet-mid)" />
+      <polygon points="-225,-180 -265,-75 -275,-145 -210,-235" fill="url(#facet-shadow)" />
+
+      <!-- Segment 4: Spiral Inward Hook (Anvil curl below ear) -->
+      <polygon points="-265,-75 -230,10 -180,-10 -215,-70" fill="url(#facet-dark)" />
+      <polygon points="-230,10 -150,20 -155,-35 -180,-10" fill="url(#facet-mid)" />
+      <!-- Horn Tip (Sharp Forward Hook) -->
+      <polygon points="-150,20 -115,-20 -155,-35" fill="url(#cyan-glow)" />
+
+      <!-- RIGHT HORN (Symmetrical Outer Sweep) -->
+      <!-- Segment 1: Horn Root -->
+      <polygon points="50,-130 140,-210 110,-240 30,-165" fill="url(#facet-light)" />
+      <polygon points="50,-130 140,-210 130,-160 45,-105" fill="url(#facet-dark)" />
+
+      <!-- Segment 2: Horn Arch -->
+      <polygon points="140,-210 225,-180 185,-140 130,-160" fill="url(#facet-mid)" />
+      <polygon points="140,-210 225,-180 210,-235 110,-240" fill="url(#facet-shadow)" />
+
+      <!-- Segment 3: Outer Horn Drop -->
+      <polygon points="225,-180 265,-75 215,-70 185,-140" fill="url(#facet-light)" />
+      <polygon points="225,-180 265,-75 275,-145 210,-235" fill="url(#facet-shadow)" />
+
+      <!-- Segment 4: Spiral Inward Hook -->
+      <polygon points="265,-75 230,10 180,-10 215,-70" fill="url(#facet-mid)" />
+      <polygon points="230,10 150,20 155,-35 180,-10" fill="url(#facet-dark)" />
+      <!-- Horn Tip (Sharp Forward Hook) -->
+      <polygon points="150,20 115,-20 155,-35" fill="url(#cyan-glow)" />
+
+      <!-- ======================================================== -->
+      <!-- CRANIAL ANVIL ARMOR & CROWN                              -->
+      <!-- ======================================================== -->
+
+      <!-- Forehead Central Strike Plate -->
+      <polygon points="0,-185 -55,-130 0,-95" fill="url(#facet-mid)" />
+      <polygon points="0,-185 55,-130 0,-95" fill="url(#facet-light)" />
+
+      <!-- Upper Brow Facets -->
+      <polygon points="-55,-130 -85,-75 -35,-85 0,-95" fill="url(#facet-dark)" />
+      <polygon points="55,-130 85,-75 35,-85 0,-95" fill="url(#facet-mid)" />
+
+      <!-- Forge Runestone Forehead Core (Cyan Ingot) -->
+      <polygon points="0,-165 -22,-135 0,-110 22,-135" fill="url(#cyan-glow)" />
+      <polygon points="0,-155 -12,-135 0,-120 12,-135" fill="#ffffff" opacity="0.8" />
+
+      <!-- ======================================================== -->
+      <!-- EYES (Electric Cyan Slanted Optics)                      -->
+      <!-- ======================================================== -->
+      <!-- Left Eye Housing & Optical Blade -->
+      <polygon points="-85,-75 -35,-85 -25,-60 -75,-50" fill="#0b0f19" />
+      <polygon points="-80,-70 -38,-80 -30,-65 -72,-57" fill="url(#cyan-glow)" />
+      <polygon points="-65,-70 -42,-77 -38,-69 -60,-63" fill="#ffffff" />
+
+      <!-- Right Eye Housing & Optical Blade -->
+      <polygon points="85,-75 35,-85 25,-60 75,-50" fill="#0b0f19" />
+      <polygon points="80,-70 38,-80 30,-65 72,-57" fill="url(#cyan-glow)" />
+      <polygon points="65,-70 42,-77 38,-69 60,-63" fill="#ffffff" />
+
+      <!-- ======================================================== -->
+      <!-- NOSE BRIDGE, CHEEKS & SNOUT                              -->
+      <!-- ======================================================== -->
+      <!-- Central Nasal Ridge -->
+      <polygon points="0,-95 -25,-60 0,35" fill="url(#facet-mid)" />
+      <polygon points="0,-95 25,-60 0,35" fill="url(#facet-light)" />
+
+      <!-- Left Cheek Armor Plate -->
+      <polygon points="-75,-50 -25,-60 0,35 -50,45 -95,20" fill="url(#facet-dark)" />
+      <polygon points="-95,20 -50,45 -40,110 -85,90" fill="url(#facet-shadow)" />
+
+      <!-- Right Cheek Armor Plate -->
+      <polygon points="75,-50 25,-60 0,35 50,45 95,20" fill="url(#facet-mid)" />
+      <polygon points="95,20 50,45 40,110 85,90" fill="url(#facet-dark)" />
+
+      <!-- Lower Snout & Muzzle Plate -->
+      <polygon points="0,35 -35,50 -25,120 0,145" fill="url(#facet-dark)" />
+      <polygon points="0,35 35,50 25,120 0,145" fill="url(#facet-mid)" />
+
+      <!-- Anvil Nostril Vents -->
+      <polygon points="-25,95 -8,110 -22,120" fill="#000000" />
+      <polygon points="25,95 8,110 22,120" fill="#000000" />
+
+      <!-- Chin Bevel / Strike Chisel -->
+      <polygon points="0,145 -25,120 -15,150 0,165" fill="url(#facet-shadow)" />
+      <polygon points="0,145 25,120 15,150 0,165" fill="url(#facet-dark)" />
+
+      <!-- Sub-facet Accents & Technical Seams -->
+      <line x1="0" y1="-185" x2="0" y2="165" stroke="#00f5ff" stroke-width="1.5" opacity="0.35" />
+      <line x1="-35" y1="50" x2="-85" y2="90" stroke="#00f5ff" stroke-width="1" opacity="0.25" />
+      <line x1="35" y1="50" x2="85" y2="90" stroke="#00f5ff" stroke-width="1" opacity="0.25" />
+
+    </g>
+  </g>
+</svg>

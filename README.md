@@ -1,8 +1,24 @@
-# SyntheticForge
+<p align="center">
+  <img src="docs/images/logo.png?raw=true" alt="SyntheticForge Logo" width="130" style="border-radius: 28px;" />
+</p>
 
-Graph-driven relational and event stream generator with probabilistic lifecycle simulation, foreign key integrity, and chaos injection.
+<h1 align="center">SyntheticForge</h1>
 
-SyntheticForge generates massive volumes of coherent relational data and temporal event streams for benchmarking distributed architectures, message brokers, and relational databases. Rather than emitting isolated mock records, SyntheticForge builds a Directed Acyclic Graph (DAG) of entities, evaluates topological dependencies to enforce 100% referential integrity, and advances entities through state machine lifecycles over simulated business time.
+<p align="center">
+  <b>Graph-driven relational and event stream generator with probabilistic lifecycle simulation, chaos injection, and W3C distributed tracing.</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/alexandrmotologa/syntheticforge/actions/workflows/ci.yml"><img src="https://github.com/alexandrmotologa/syntheticforge/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/alexandrmotologa/syntheticforge/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"></a>
+  <a href="https://python.org"><img src="https://img.shields.io/badge/Python-3.12%20%7C%203.13%20%7C%203.14-blue?logo=python&logoColor=white" alt="Python Version"></a>
+  <a href="https://github.com/astral-sh/uv"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json" alt="uv"></a>
+  <a href="https://github.com/astral-sh/ruff"><img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json" alt="Ruff"></a>
+</p>
+
+---
+
+SyntheticForge generates coherent relational data and temporal event streams for benchmarking distributed architectures, message brokers, and relational databases. Rather than emitting isolated mock records, SyntheticForge builds a Directed Acyclic Graph (DAG) of entities, evaluates topological dependencies to enforce 100% referential integrity, and advances entities through state machine lifecycles over simulated business time.
 
 ```
                   +-----------------------------------+
@@ -41,6 +57,32 @@ SyntheticForge generates massive volumes of coherent relational data and tempora
 +-----------+     +-----------+           +-----------+     +-----------+
 ```
 
+## Visual tour
+
+### Interactive web studio
+
+Launch the browser studio with `syntheticforge studio --schema <path>` to inspect topological stages, review entity state machines, and synthesize live sample records:
+
+<p align="center">
+  <img src="docs/images/studio_overview.png?raw=true" alt="SyntheticForge Web Studio Overview" width="880" style="border-radius: 10px; border: 1px solid #334155;" />
+</p>
+
+### CLI schema inspection
+
+View dependency tiers, primary key types, foreign key distributions, and lifecycle state counts directly in your terminal:
+
+<p align="center">
+  <img src="docs/images/cli_inspect.png?raw=true" alt="SyntheticForge CLI Schema Inspection" width="880" style="border-radius: 10px;" />
+</p>
+
+### DuckDB referential integrity audit
+
+Run zero-copy in-memory SQL audits to confirm that child records link to valid parent IDs without orphan references:
+
+<p align="center">
+  <img src="docs/images/cli_verify.png?raw=true" alt="SyntheticForge DuckDB Referential Integrity Audit" width="880" style="border-radius: 10px;" />
+</p>
+
 ## Key features
 
 - **Topological entity ordering**: Uses `networkx` to resolve dependency trees. Parent entities always generate before child entities, preventing orphan foreign keys.
@@ -48,10 +90,13 @@ SyntheticForge generates massive volumes of coherent relational data and tempora
 - **Probabilistic lifecycle simulation**: Emits state transition events over time driven by Markov chains with configurable inter-arrival delays.
 - **Temporal time-travel engine**: Accelerates simulated time via a virtual clock (`speed_factor`), running multi-hour business workflows in seconds without distorting timestamps.
 - **Targeted chaos injection**: Injects controlled rates of duplicate keys (idempotency testing), schema mutations, null values, and corrupted byte payloads (dead-letter queue validation).
-- **High-throughput dispatchers**: Streams asynchronously to Apache Kafka topics, writes directly to PostgreSQL using binary `COPY` via `asyncpg`, or exports to JSON Lines and Apache Parquet.
+- **OpenTelemetry W3C distributed tracing**: Emits valid `traceparent` and `tracestate` headers across Kafka events and HTTP Webhooks, preserving causal parent-child spans across transitions.
+- **Self-referencing and deferred foreign keys**: Handles organizational hierarchies (`parent_id`) and two-pass deferred mutual dependencies (`account` and `card`).
+- **High-throughput dispatchers**: Streams asynchronously to Apache Kafka topics, writes directly to PostgreSQL using binary `COPY` via `asyncpg`, delivers signed HTTP Webhooks with HMAC SHA-256, or exports to JSON Lines and Apache Parquet.
+- **Soak test observability**: Exposes live Prometheus metrics (throughput, error counters, event histograms) on an async HTTP `/metrics` endpoint.
+- **State checkpointing**: Saves and restores entity ID pools and virtual clock state, allowing interrupted soak tests to resume without key collisions.
 - **Schema auto-introspection**: Reverse engineers existing PostgreSQL schemas into declarative SyntheticForge YAML specifications.
 - **DuckDB integrity verifier**: In-memory relational auditor checking 100% referential consistency and valid lifecycle transitions on generated datasets.
-- **Live terminal dashboard**: Rich interactive TUI tracking events per second, entity totals, active transitions, and anomaly rates.
 
 ## Installation
 
