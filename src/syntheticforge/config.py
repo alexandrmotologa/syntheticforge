@@ -174,12 +174,21 @@ def load_config(source: str | Path | dict[str, Any]) -> ForgeConfig:
     if isinstance(source, dict):
         return ForgeConfig.model_validate(source)
 
-    if isinstance(source, Path) or (isinstance(source, str) and Path(source).is_file()):
-        content = Path(source).read_text(encoding="utf-8")
+    if isinstance(source, Path):
+        content = source.read_text(encoding="utf-8")
         parsed = yaml.safe_load(content)
         return ForgeConfig.model_validate(parsed)
 
     if isinstance(source, str):
+        if "\n" not in source:
+            try:
+                p = Path(source)
+                if p.is_file():
+                    content = p.read_text(encoding="utf-8")
+                    parsed = yaml.safe_load(content)
+                    return ForgeConfig.model_validate(parsed)
+            except (OSError, ValueError):
+                pass
         parsed = yaml.safe_load(source)
         return ForgeConfig.model_validate(parsed)
 
