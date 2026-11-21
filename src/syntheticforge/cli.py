@@ -13,6 +13,7 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.table import Table
 
+from syntheticforge import __version__
 from syntheticforge.config import load_config
 from syntheticforge.generator.anomaly import AnomalyInjector
 from syntheticforge.generator.entity_generator import EntityGenerator
@@ -33,6 +34,28 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 console = Console()
+
+
+def version_callback(value: bool) -> None:
+    if value:
+        console.print(
+            f"[bold cyan]SyntheticForge[/bold cyan] version [bold white]{__version__}[/bold white]"
+        )
+        raise typer.Exit()
+
+
+@app.callback()
+def main(
+    version: bool | None = typer.Option(
+        None,
+        "--version",
+        "-v",
+        help="Show version and exit.",
+        callback=version_callback,
+        is_eager=True,
+    ),
+) -> None:
+    pass
 
 
 @app.command()
@@ -348,6 +371,14 @@ def introspect(
         console.print(f"[bold green]Wrote introspected schema to {output}[/]")
     else:
         console.print(yaml_content)
+
+
+@app.command(name="version")
+def version_cmd() -> None:
+    """Show SyntheticForge version and exit."""
+    console.print(
+        f"[bold cyan]SyntheticForge[/bold cyan] version [bold white]{__version__}[/bold white]"
+    )
 
 
 if __name__ == "__main__":

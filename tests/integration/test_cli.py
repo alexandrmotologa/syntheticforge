@@ -9,6 +9,20 @@ from syntheticforge.cli import app
 runner = CliRunner()
 
 
+def test_cli_version() -> None:
+    res_long = runner.invoke(app, ["--version"])
+    assert res_long.exit_code == 0
+    assert "SyntheticForge version 0.1.1" in res_long.output
+
+    res_short = runner.invoke(app, ["-v"])
+    assert res_short.exit_code == 0
+    assert "SyntheticForge version 0.1.1" in res_short.output
+
+    res_cmd = runner.invoke(app, ["version"])
+    assert res_cmd.exit_code == 0
+    assert "SyntheticForge version 0.1.1" in res_cmd.output
+
+
 def test_cli_inspect() -> None:
     result = runner.invoke(app, ["inspect", "schemas/e-commerce-flow.yaml"])
     assert result.exit_code == 0

@@ -18,6 +18,10 @@
 
 ---
 
+<p align="center">
+  <img src="docs/images/syntheticforge_demo.gif" alt="SyntheticForge Interactive Demo" width="100%" />
+</p>
+
 SyntheticForge generates coherent relational data and temporal event streams for benchmarking distributed architectures, message brokers, and relational databases. Rather than emitting isolated mock records, SyntheticForge builds a Directed Acyclic Graph (DAG) of entities, evaluates topological dependencies to enforce 100% referential integrity, and advances entities through state machine lifecycles over simulated business time.
 
 ```
